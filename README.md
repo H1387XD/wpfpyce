@@ -6,4 +6,4 @@
 
 **PS.Please dont judge my code :)**
 
-***Also it's not complete (Barely doenst have castling)***
+***Also it's not complete (Barely haves castling)***
