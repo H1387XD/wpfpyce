@@ -336,7 +336,13 @@ class Board:
             end=(9-int(uci[3]),uciToRC[uci[2]])
         piece=self.Board[start[0]][start[1]]
         if piece.piece[1]=='P':
+            gg=''
             if piece.col=='b':
+                if end[0]==7:
+                    while gg not in ["q",'b','n','r']:
+                        gg=input('Promote Pawn (Q/B/N/R): ').lower()
+                        print('invalid piece')
+                    piece=Piece(f"b{gg.upper()}")
                 if end[0]==3:
                     self.LegalMoveGenerator.whiteEP.append((end[0], end[1]+1))
                     self.LegalMoveGenerator.whiteEP.append((end[0], end[1]-1))
@@ -344,6 +350,11 @@ class Board:
                 if end[0]==4:
                     self.LegalMoveGenerator.whiteEP.append((end[0], end[1]+1))
                     self.LegalMoveGenerator.whiteEP.append((end[0], end[1]-1))
+                if end[0]==0:
+                    while gg not in ["q",'b','n','r']:
+                        gg=input('Promote Pawn (Q/B/N/R): ').lower()
+                        print('invalid piece')
+                    piece=Piece(f"w{gg.upper()}")
                     
         if piece.piece[1]=='K':
             if piece.col=='b':
