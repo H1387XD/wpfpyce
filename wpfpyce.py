@@ -18,6 +18,8 @@ class Piece:
         self.pieceType=pieceStr[1].lower() if self.col=='b' else pieceStr[1].upper()
     def __repr__(self):
         return self.piece
+    def __eq__(self, other):
+        return self.piece==other.piece
 class LegalMoveGenerator:
     def __init__(self,board):
         self.legalMoves=[]
@@ -254,12 +256,40 @@ class Board:
                     ["wR","wN","wB","wQ","wK","wB","wN","wR"]]
         
         self.Board=[]
+        self.kSP=((0,4),(7,4))
         for y in range(8):
             self.Board.append([])
             for x in range(8):
                 self.Board[y].append(Piece(self.BoardStr[y][x]))
         self.LegalMoveGenerator=LegalMoveGenerator(self.Board)
         self.moveLog=[]
+    def checkIfKingCanCastle(self, long=False, Color='w'):
+        castling={'w':self.LegalMoveGenerator.white_castlingrights,
+                  'b':self.LegalMoveGenerator.black_castlingrights}
+        kSP=self.kSP[1] if Color=="w" else self.kSP[0]
+        rank=0 if Color=='b' else 7
+        if {False:"O-O",True:"O-O-O"}[long] not in castling[Color]:
+            print('does not have castling rights')
+            return False
+        if self.Board[kSP[0]][kSP[1]].piece!=Piece(f'{Color}K').piece:
+            print('king not in startingposition')
+            print(self.Board[kSP[0]][kSP[1]])
+            return False
+        if long:
+            for i in range(1,4,1):
+                if self.Board[rank][i+2].piece not in(Piece('--').piece, Piece(f'{Color}K').piece):
+                    print(rank, i+2)
+                    print(self.Board[rank][i+2])
+                    return False
+            else:
+                return True
+        else:
+            for i in range(2):
+                if self.Board[rank][i+5].piece!=Piece('--').piece:
+                    return False
+            else:
+                return True
+
     def validUci(self,uci):
         uciToRC={'a':0,'b':1,'c':2,'d':3,'e':4,'f':5,'g':6,'h':7}
         
@@ -301,7 +331,26 @@ class Board:
         return isAttacked
 
     def push_uci(self, uci):
+        rank=0 if self.LegalMoveGenerator.colortoPlay=='b' else 7
+        if uci in ['O-O-O',"O-O"]:
+            if self.checkIfKingCanCastle({"O-O-O":True, "O-O":False}[uci], self.LegalMoveGenerator.colortoPlay):
+                if uci=="O-O-O":
+                    self.Board[rank][0]=Piece('--')
+                    self.Board[rank][3]=Piece(f'{self.LegalMoveGenerator.colortoPlay}R')
+                    self.Board[rank][2]=Piece(f'{self.LegalMoveGenerator.colortoPlay}K')
+                    self.Board[rank][4]=Piece('--')
+                    return
+                else:
+                    self.Board[rank][7]=Piece('--')
+                    self.Board[rank][5]=Piece(f'{self.LegalMoveGenerator.colortoPlay}R')
+                    self.Board[rank][6]=Piece(f'{self.LegalMoveGenerator.colortoPlay}K')
+                    self.Board[rank][4]=Piece('--')
+                    return
+            else:
+                return print('Cannot Castle')
+
         self.LegalMoveGenerator.generateMoves(self.Board)
+        
         if not self.validUci(uci)[0]:
             return print('invalid')
         if self.indangersKing(uci):
@@ -314,7 +363,17 @@ class Board:
             end=(8-int(uci[3]),uciToRC[uci[2]])
         else:
             end=(9-int(uci[3]),uciToRC[uci[2]])
+        endpiece=self.Board[end[0]][end[1]]
         piece=self.Board[start[0]][start[1]]
+        bcr=self.LegalMoveGenerator.black_castlingrights
+        wcr=self.LegalMoveGenerator.white_castlingrights
+        if endpiece.piece[1]=='R':
+            if endpiece.col=='b':
+                bcrRight={0:bcr[0],7:bcr[1]}[end[1]]
+                bcr.remove(bcrRight)
+            else:
+                wcrRight={0:wcr[0],7:wcr[1]}[end[1]]
+                wcr.remove(wcrRight)
         if piece.piece[1]=='P':
             gg=''
             if piece.col=='b':
@@ -370,4 +429,3 @@ class Board:
             d+='\n'
         return d
 ChessBoard=Board()
-print(ChessBoard)
