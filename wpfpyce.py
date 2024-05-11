@@ -271,7 +271,7 @@ class Board:
                 return (False,'t')
             if move.uci == uci:
                 return (True,'t')
-        return False
+        return (False, 't')
     def indangersKing(self, uci):
         isAttacked=False
         uciToRC = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
@@ -300,26 +300,6 @@ class Board:
 
         return isAttacked
 
-    def is_square_attacked(self, square, attacker_color):
-        directions = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (-1, 1), (1, -1)]
-
-        def is_valid_square(square):
-            return 0 <= square[0] < 8 and 0 <= square[1] < 8
-
-        for dr, dc in directions:
-            r, c = square[0], square[1]
-            while is_valid_square((r, c)):
-                r += dr
-                c += dc
-                if not is_valid_square((r, c)):
-                    break
-                piece = self.Board[r][c]
-                if piece.piece != '--':
-                    if piece.col != attacker_color:
-                        if piece.pieceType in ['Q', 'R']:
-                            return True
-                    break
-        return False
     def push_uci(self, uci):
         self.LegalMoveGenerator.generateMoves(self.Board)
         if not self.validUci(uci)[0]:
@@ -390,3 +370,4 @@ class Board:
             d+='\n'
         return d
 ChessBoard=Board()
+print(ChessBoard)
